@@ -4,6 +4,7 @@
     height: 320px;
     display: flex;
     flex-wrap: wrap;
+    
 }
 
 .square{
@@ -25,12 +26,18 @@
     height: 30px;
     margin: 5px;
     position: relative;
+    z-index: -9;
 }
+
 path{
     position: relative;
     z-index: -10;
 }
 
+.piece{
+    position: relative;
+    z-index: 9;
+}
 
 
 .black > svg{
