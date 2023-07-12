@@ -9,6 +9,8 @@ const width = 8;
 let playerGo = 'black';
 playerDisplay.textContent = 'black';
 
+let blocked = false;
+
 const startPieces = [
     rook, knight, bishop, queen, king, bishop, knight, rook,
     pawn, pawn, pawn, pawn, pawn, pawn, pawn, pawn,
@@ -84,7 +86,7 @@ function dragDrop(e) {
 
     const takenByOpponent = e.target?.classList.contains(opponentGo)
 
-    const valid = checkIfValid(e.target)
+    const valid = checkIfValid(e.target, opponentGo, blocked)
 
     console.log('correct go', correctGo)
     console.log('taken', taken)
@@ -123,98 +125,184 @@ function dragDrop(e) {
 
 
 
- function checkIfValid(target){
-    const targetId = Number(target.getAttribute('square-id')) || Number(target.parentNode.getAttribute('square-id'))
+function checkIfValid(target, opponentGo, blocked) {
+    const targetId =
+      Number(target.getAttribute("square-id")) ||
+      Number(target.parentNode.getAttribute("square-id"));
+  
+    const startId = Number(startPositionId);
+  
+    const piece = draggedElement.id;
+  
+    switch (piece) {
+      case "pawn":
+        const starterRow = [8, 9, 10, 11, 12, 13, 14, 15];
+  
+        if (
+          (starterRow.includes(startId)) &&
+          (startId + width * 2 === targetId ||
+        startId + width === targetId) ||
+        (startId + width - 1 === targetId &&
+          document.querySelector(`[square-id="${startId + width - 1}"]`).firstChild) ||
+        (startId + width + 1 === targetId &&
+          document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild)
+        ) {
+          return true;
+        }
+        break;
+  
+      case "knight":
+        if (
+          startId + width + 2 === targetId ||
+          startId + width - 2 === targetId ||
+          startId - width + 2 === targetId ||
+          startId - width - 2 === targetId ||
+          startId + width * 2 + 1 === targetId ||
+          startId + width * 2 - 1 === targetId ||
+          startId - width * 2 + 1 === targetId ||
+          startId - width * 2 - 1 === targetId
+        ) {
+          return true;
+        }
+      break;
+  
+      case "bishop":
+      let positiveXpositiveY = 0;
+      let positiveXnegativeY = 0;
+      let negativeXpositiveY = 0;
+      let negativeXnegativeY = 0;
+      let valid = false;
 
-    const startId = Number(startPositionId)
+      for (let i = 1; i <= 7; i++) {
+        positiveXpositiveY = startId + i * (width + 1);
+        positiveXnegativeY = startId + i * (width - 1);
+        negativeXpositiveY = startId - i * (width - 1);
+        negativeXnegativeY = startId - i * (width + 1);
 
-    const piece = draggedElement.id
-
-    switch(piece){
-        case 'pawn':
-            const starterRow = [8, 9, 10, 11, 12, 13, 14, 15]
-
-            if(
-                (starterRow.includes(startId) && (startId + (width * 2)) === targetId) ||
-                (startId + width === targetId) || 
-                (startId + width - 1 === targetId && document.querySelector(`[square-id="${startId + width - 1}"]`).firstChild) ||
-                (startId + width + 1 === targetId && document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild)
-
-            ){
-                return true;
-            }
+        if (
+          positiveXnegativeY === targetId ||
+          positiveXpositiveY === targetId ||
+          negativeXnegativeY === targetId ||
+          negativeXpositiveY === targetId
+        ) {
+          if (
+            !blocked &&
+            !(document.querySelector(
+              `[square-id="${positiveXpositiveY}"]`
+            )?.firstChild) &&
+            document
+              .querySelector(`[square-id="${positiveXpositiveY}"]`)
+              ?.firstChild?.classList.contains(opponentGo)
+          ) {
+            valid = true;
             break;
-        
-        case 'knight':
-            if(
-                startId + width + 2 === targetId || 
-                startId + width - 2 === targetId ||
-                startId - width + 2 === targetId || 
-                startId - width - 2 === targetId ||
-                startId + width*2 + 1 === targetId ||
-                startId + width*2 - 1 === targetId ||
-                startId - width*2 + 1 === targetId ||
-                startId - width*2 - 1 === targetId 
-             ){
-                return true;
-            }
+          }
+
+          if (
+            !blocked &&
+            !(document.querySelector(
+              `[square-id="${positiveXnegativeY}"]`
+            )?.firstChild) &&
+            document
+              .querySelector(`[square-id="${positiveXnegativeY}"]`)
+              ?.firstChild?.classList.contains(opponentGo)
+          ) {
+            valid = true;
             break;
-        
-        case 'bishop':
-            if(
-                startId + width + 1 === targetId ||
+          }
 
-                startId + width * 2 + 2 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild ||
-
-                startId + width * 3 + 3 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild || 
-
-                startId + width * 4 + 4 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*3 + 3}"]`).firstChild  ||
-
-                startId + width * 5 + 5 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*3 + 3}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*4 + 4}"]`).firstChild  ||
-
-                startId + width * 6 + 6 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*3 + 3}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*4 + 4}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*5 + 5}"]`).firstChild  ||
-
-                startId + width * 7 + 7 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*3 + 3}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*4 + 4}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*5 + 5}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*6 + 6}"]`).firstChild  ||
-
-                startId + width * 8 + 8 === targetId && !document.querySelector(`[square-id="${startId + width + 1}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*2 + 2}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*3 + 3}"]`).firstChild &&
-                !document.querySelector(`[square-id="${startId + width*4 + 4}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*5 + 5}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*6 + 6}"]`).firstChild && !document.querySelector(`[square-id="${startId + width*7 + 7}"]`).firstChild
-
-            ){
-                return true;
-            }
+          if (
+            !blocked &&
+            !(document.querySelector(
+              `[square-id="${negativeXnegativeY}"]`
+            )?.firstChild) &&
+            document
+              .querySelector(`[square-id="${negativeXnegativeY}"]`)
+              ?.firstChild?.classList.contains(opponentGo)
+          ) {
+            valid = true;
             break;
-        
-        case 'rook':
+          }
+
+          if (
+            !blocked &&
+            !(document.querySelector(
+              `[square-id="${negativeXpositiveY}"]`
+            )?.firstChild) &&
+            document
+              .querySelector(`[square-id="${negativeXpositiveY}"]`)
+              ?.firstChild?.classList.contains(opponentGo)
+          ) {
+            valid = true;
+            break;
+          }
+        }
+      }
+
+      return valid;
+      
+      
+      
+      break; 
+    
+      case "rook":
+        let positiveY = 0;
+        let positiveX = 0;
+        let negativeY = 0;
+        let negativeX = 0;
+  
+        for (let i = 1; i <= width - 1; i++) {
+          positiveX = startId + i;
+          positiveY = startId + i * width;
+          negativeX = startId - i;
+          negativeY = startId - i * width;
+  
+          if (
+            (positiveY === targetId &&
+              (!document.querySelector(`[square-id="${startId + i * width}"]`) ||
+                document
+                  .querySelector(`[square-id="${startId + i * width}"]`)
+                  ?.firstChild?.classList.contains(opponentGo))) ||
+  
+            (negativeY === targetId &&
+              (!document.querySelector(`[square-id="${startId - i * width}"]`) ||
+                document
+                  .querySelector(`[square-id="${startId - i * width}"]`)
+                  ?.firstChild?.classList.contains(opponentGo)))
+          ) {
+            return true;
+          }
+        }
+  
+        break;
     }
- }
+}
 
- function changePlayer(){
-    if(playerGo === "black"){
-        reverseIds();
-        playerGo = "white";
-        playerDisplay.textContent = "white"
+
+  
+  function changePlayer() {
+    if (playerGo === "black") {
+      reverseIds();
+      playerGo = "white";
+      playerDisplay.textContent = "white";
     } else {
-        revertIds();
-        playerGo = "black"
-        playerDisplay.textContent = "black"
+      revertIds();
+      playerGo = "black";
+      playerDisplay.textContent = "black";
     }
- }
-
- function reverseIds() {
+  }
+  
+  function reverseIds() {
     const allSquares = document.querySelectorAll(".square");
-    allSquares.forEach((square, i) => {square.setAttribute('square-id', (width * width - 1) - i)})
- }
- function revertIds() {
+    allSquares.forEach((square, i) => {
+      square.setAttribute("square-id", width * width - 1 - i);
+    });
+  }
+  
+  function revertIds() {
     const allSquares = document.querySelectorAll(".square");
     allSquares.forEach((square, i) => square.setAttribute("square-id", i));
   }
+  
+  // The rest of the code remains the same
   
