@@ -184,19 +184,21 @@ function checkIfValid(target, opponentGo) {
   
         break;
 
+        //startId = 7  targetId = 23
     case "rook":
-      const startRow = Math.floor(startId / width);
-      const startCol = startId % width;
-      const targetRow = Math.floor(targetId / width);
-      const targetCol = targetId % width;
+      const startRow = Math.floor(startId / width); //0
+      const startCol = startId % width; //7
+      const targetRow = Math.floor(targetId / width); //2
+      const targetCol = targetId % width; //7
+      
 
       if (startRow === targetRow || startCol === targetCol) {
-        const stepRow = startRow === targetRow ? 0 : (targetRow > startRow ? 1 : -1);
-        const stepCol = startCol === targetCol ? 0 : (targetCol > startCol ? 1 : -1);
+        const stepRow = startRow === targetRow ? 0 : (targetRow > startRow ? 1 : -1); //1
+        const stepCol = startCol === targetCol ? 0 : (targetCol > startCol ? 1 : -1); //0
 
-        let currentRow = startRow + stepRow;
-        let currentCol = startCol + stepCol;
-        let currentPosition = currentRow * width + currentCol;
+        let currentRow = startRow + stepRow; //1
+        let currentCol = startCol + stepCol; //7
+        let currentPosition = currentRow * width + currentCol; //15
 
         isValid = true; // valid'i true olarak başlat
 
@@ -222,6 +224,94 @@ function checkIfValid(target, opponentGo) {
       }
 
       break;
+
+      //targetId = 19 , startId = 3
+    
+    case "queen":
+
+      const startRowQueen = Math.floor(startId / width); //0
+      const startColQueen = startId % width; // 3
+      const targetRowQueen = Math.floor(targetId / width); // 2 
+      const targetColQueen = targetId % width; // 3
+      const rowDiffQueen = targetRowQueen - startRowQueen; // 2
+      const colDiffQueen = targetColQueen -startColQueen; // 0
+
+
+      if( startRowQueen === targetRowQueen || 
+          targetColQueen === startColQueen ||
+          Math.abs(rowDiffQueen) === Math.abs(colDiffQueen)){
+            const stepRowQueen = targetRowQueen === startRowQueen ? 0 : (targetRowQueen > startRowQueen ? 1 : -1) // 1
+            const stepColQueen = targetColQueen === startColQueen ? 0 : (targetColQueen > startColQueen ? 1 : -1) // 0
+            const stepRowDiogonal = rowDiffQueen > 0 ? 1 : -1 // 1
+            const stepColDiogonal = colDiffQueen > 0 ? 1 : -1 // -1
+
+            let currentRowQueen = startRowQueen + stepRowQueen //1
+            let currentColQueen = startColQueen + stepColQueen //3
+
+            let currentPositionQueen = (currentRowQueen) * width + currentColQueen // 11
+            let currentPositionDiogonal = startId + stepRowDiogonal * width + stepColDiogonal // 10
+
+            
+
+            isValid = true // valid true döndür
+            
+            while(currentRowQueen !== targetRowQueen || currentColQueen !== targetColQueen){
+              const currentPieceQueen = document.querySelector(`[square-id="${currentPositionQueen}"]`)?.firstChild;
+              const currentPieceDiogonal = document.querySelector(`[square-id="${currentPositionDiogonal}"]`)?.firstChild;
+
+              if(currentPieceQueen){
+                isValid = false
+                break;
+              } 
+
+              currentRowQueen += stepRowQueen; //2
+              currentColQueen += stepColQueen; //3
+              currentPositionQueen = (currentRowQueen) * width + currentColQueen; //19
+              currentPositionDiogonal += stepRowDiogonal * width + stepColDiogonal;
+
+            }
+          }
+          if (isValid) {
+            const targetPiece = document.querySelector(`[square-id="${targetId}"]`)?.firstChild;
+            if (targetPiece && targetPiece.classList.contains(opponentGo)) {
+              isValid = true; // valid'i true olarak güncelle
+            }
+          }
+      break;
+    
+
+    //startId = 4 targetId = 12
+    case "king":
+        isValid = false; // Başlangıçta true olarak ayarlayın.
+
+        if (
+          // Hareket kurallarını kontrol edin ve geçersiz durumda isValid değerini false olarak ayarlayın.
+          (startId + width === targetId &&
+            (!document.querySelector(`[square-id="${startId + width}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId + width}"]`)?.firstChild?.classList.contains(opponentGo))) ||
+          (startId - width === targetId &&
+            (!document.querySelector(`[square-id="${startId - width}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId - width}"]`)?.firstChild?.classList.contains(opponentGo))) ||
+          (startId - 1 === targetId &&
+            (!document.querySelector(`[square-id="${startId - 1}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId - 1}"]`)?.firstChild?.classList.contains(opponentGo))) ||
+          (startId + 1 === targetId &&
+            (!document.querySelector(`[square-id="${startId + 1}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId + 1}"]`)?.firstChild?.classList.contains(opponentGo))) ||
+          (startId + width - 1 === targetId &&
+            (!document.querySelector(`[square-id="${startId + width - 1}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId + width - 1}"]`)?.firstChild?.classList.contains(opponentGo))) ||
+          (startId + width + 1 === targetId &&
+            (!document.querySelector(`[square-id="${startId + width + 1}"]`)?.firstChild ||
+              document.querySelector(`[square-id="${startId + width + 1}"]`)?.firstChild?.classList.contains(opponentGo)))
+        ) {
+          const playerKingPosition = document.querySelector(`[square]`)
+          isValid = true; // Geçersiz durumda isValid değerini false olarak ayarlayın.
+        }
+        // Diğer kontrol durumları burada devam eder...
+
+  break;
+
   }
 
   return isValid; // valid değerini döndür
